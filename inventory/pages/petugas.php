@@ -14,12 +14,12 @@ include '../components/navbar.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Petugas</title>
+    <title>Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
-    <h2 class="my-4">Selamat datang, Petugas!</h2>
+    <h2 class="my-4">Selamat datang!</h2>
 
     <div class="row">
         <div class="col-md-6">
@@ -27,7 +27,7 @@ include '../components/navbar.php';
                 <div class="card-body">
                     <h5 class="card-title">Barang Masuk</h5>
                     <p class="card-text">Catat barang yang masuk ke gudang.</p>
-                    <a href="barang_masuk.php" class="btn btn-light">Akses</a>
+                    <a href="barang_masuk.php" class="btn btn-light">Click</a>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@ include '../components/navbar.php';
                 <div class="card-body">
                     <h5 class="card-title">Barang Keluar</h5>
                     <p class="card-text">Catat barang yang keluar dari gudang.</p>
-                    <a href="barang_keluar.php" class="btn btn-light">Akses</a>
+                    <a href="barang_keluar.php" class="btn btn-light">Click</a>
                 </div>
             </div>
         </div>

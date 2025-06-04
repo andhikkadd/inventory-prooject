@@ -1,5 +1,4 @@
 <?php
-// config/db.php
 $host = 'localhost';
 $db = 'inventory';
 $user = 'root';

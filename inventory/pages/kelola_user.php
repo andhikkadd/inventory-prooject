@@ -7,7 +7,6 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
 
 require_once '../config/db.php';
 
-// Handle hapus user
 if (isset($_GET['hapus'])) {
     $id = intval($_GET['hapus']);
     $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
@@ -23,15 +22,13 @@ if (isset($_GET['hapus'])) {
     exit;
 }
 
-// Handle tambah/edit user
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = htmlspecialchars($_POST['username']);
     $nama_lengkap = htmlspecialchars($_POST['nama_lengkap']);
     $role = $_POST['role'];
-    $password = $_POST['password']; // kosongkan jika edit dan gak mau ganti
+    $password = $_POST['password'];
 
     if (isset($_POST['id']) && $_POST['id'] != '') {
-        // Edit user
         $id = intval($_POST['id']);
         if ($password) {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
@@ -50,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['message_type'] = "danger";
         }
     } else {
-        // Tambah user baru
         if (!$password) {
             $_SESSION['message'] = "Password wajib diisi untuk user baru.";
             $_SESSION['message_type'] = "danger";
@@ -72,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Ambil data user
 $result = $conn->query("SELECT * FROM users ORDER BY id DESC");
 ?>
 
@@ -121,7 +116,6 @@ $result = $conn->query("SELECT * FROM users ORDER BY id DESC");
   </table>
 </div>
 
-<!-- Modal Tambah/Edit -->
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" id="formUser">
@@ -162,7 +156,6 @@ $result = $conn->query("SELECT * FROM users ORDER BY id DESC");
   </div>
 </div>
 
-<!-- Modal Hapus Konfirmasi -->
 <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -213,7 +206,6 @@ document.querySelectorAll('.btn-hapus').forEach(button => {
   });
 });
 
-// Reset modal form saat modal ditutup
 var modalTambah = document.getElementById('modalTambah');
 modalTambah.addEventListener('hidden.bs.modal', function () {
   document.getElementById('modalTambahLabel').textContent = 'Tambah User';

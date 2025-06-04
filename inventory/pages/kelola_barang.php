@@ -8,14 +8,11 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
 require_once '../config/db.php';
 include '../pages/navbar.php';
 
-// Handle hapus
 if (isset($_GET['hapus'])) {
     $id = intval($_GET['hapus']);
-    // Hapus barang
     $stmt = $conn->prepare("DELETE FROM items WHERE id = ?");
     $stmt->bind_param("i", $id);
     if ($stmt->execute()) {
-        // Catat log aktivitas
         $user_id = $_SESSION['id_user'];
         $action = "Menghapus barang dengan ID: $id";
         $log = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
@@ -29,7 +26,6 @@ if (isset($_GET['hapus'])) {
     }
 }
 
-// Handle tambah / edit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = htmlspecialchars($_POST['nama_barang']);
     $deskripsi = htmlspecialchars($_POST['deskripsi']);
@@ -38,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['id_user'];
 
     if (isset($_POST['id']) && $_POST['id'] != '') {
-        // Edit barang
         $id = intval($_POST['id']);
         $stmt = $conn->prepare("UPDATE items SET nama_barang=?, deskripsi=?, jumlah=?, harga=? WHERE id=?");
         $stmt->bind_param("ssidi", $nama, $deskripsi, $jumlah, $harga, $id);
@@ -59,7 +54,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } else {
-        // Tambah barang
         $stmt = $conn->prepare("INSERT INTO items (nama_barang, deskripsi, jumlah, harga) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssis", $nama, $deskripsi, $jumlah, $harga);
         if ($stmt->execute()) {
@@ -82,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Ambil data barang untuk tampil
 $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
 ?>
 
@@ -134,7 +127,6 @@ $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
     </table>
 </div>
 
-<!-- Modal Tambah/Edit -->
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-labelledby="modalTambahLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="POST" id="formBarang">
@@ -171,7 +163,6 @@ $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
   </div>
 </div>
 
-<!-- Modal Hapus Konfirmasi -->
 <div class="modal fade" id="modalHapus" tabindex="-1" aria-labelledby="modalHapusLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -190,7 +181,6 @@ $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
   </div>
 </div>
 
-<!-- Modal Notifikasi -->
 <div class="modal fade" id="modalNotif" tabindex="-1" aria-labelledby="modalNotifLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -199,7 +189,6 @@ $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="modalNotifBody">
-        <!-- Pesan notifikasi muncul di sini -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -242,7 +231,6 @@ document.querySelectorAll('.btn-hapus').forEach(button => {
     });
 });
 
-// Reset modal form saat tutup
 var modalTambah = document.getElementById('modalTambah');
 modalTambah.addEventListener('hidden.bs.modal', function () {
     document.getElementById('modalTambahLabel').textContent = 'Tambah Barang';
@@ -256,7 +244,6 @@ modalTambah.addEventListener('hidden.bs.modal', function () {
       var modalNotif = new bootstrap.Modal(document.getElementById('modalNotif'));
       document.getElementById('modalNotifBody').textContent = "<?= $_SESSION['message'] ?>";
 
-      // Ganti warna header modal sesuai tipe pesan
       var modalHeader = document.querySelector('#modalNotif .modal-header');
       <?php if($_SESSION['message_type'] === 'success'): ?>
         modalHeader.classList.remove('bg-danger');
