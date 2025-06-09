@@ -2,45 +2,27 @@
 if (!isset($_SESSION)) session_start();
 $username = $_SESSION['username'] ?? 'User';
 $role = $_SESSION['role'] ?? 'guest';
+
 ?>
 
-<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm mb-4">
+<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm mb-4 p-3">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold text-primary" href="#">
-      <i class="fas fa-box-open me-2"></i>Inventory App
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <a class="navbar-brand fw-bold fs-3 text-primary"
+      <?php if ($_SESSION['role'] == 'admin'): ?> href="../admin/admin.php"<?php endif; ?>
+      <?php if ($_SESSION['role'] == 'petugas'): ?> href="../petugas/petugas.php"<?php endif; ?>
+    ><i class="fas fa-box-open me-2"></i>Inventory App</class=>
     
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <?php if ($role == 'admin'): ?>
-          <li class="nav-item"><a class="nav-link text-dark" href="admin.php">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="kelola_barang.php">Kelola Barang</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="kelola_user.php">Kelola User</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="laporan.php">Laporan</a></li>
-        <?php elseif ($role == 'petugas'): ?>
-          <li class="nav-item"><a class="nav-link text-dark" href="petugas.php">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="barang_masuk.php">Barang Masuk</a></li>
-          <li class="nav-item"><a class="nav-link text-dark" href="barang_keluar.php">Barang Keluar</a></li>
-        <?php elseif ($role == 'viewer'): ?>
-          <li class="nav-item"><a class="nav-link text-dark" href="viewer.php">Dashboard</a></li>
-        <?php endif; ?>
-      </ul>
+    <ul class="navbar-nav">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-primary fw-semibold fs-5" href="#" role="button" data-bs-toggle="dropdown">
+          <i class="fas fa-user-circle me-1"></i> <?= ucfirst($username) ?>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+        </ul>
+      </li>
+    </ul>
 
-      <ul class="navbar-nav">
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle text-primary fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
-            <i class="fas fa-user-circle me-1"></i> <?= ucfirst($username) ?>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profil</a></li>
-            <li><a class="dropdown-item" href="../logout.php"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
   </div>
 </nav>
 

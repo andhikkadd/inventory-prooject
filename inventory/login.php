@@ -44,9 +44,6 @@ if (isset($_POST['login'])) {
                 <div class="card shadow rounded-4 border-0">
                     <div class="card-body p-4">
                         <h3 class="text-center mb-4 fw-bold">Selamat Datang 👋</h3>
-                        <p class="text-center text-muted mb-4" style="font-size: 0.95rem;">
-                            Masuk untuk mengelola inventory
-                        </p>
                         <form method="POST" action="">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
@@ -56,10 +53,10 @@ if (isset($_POST['login'])) {
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" name="password" id="password" class="form-control custom-input" placeholder="Masukkan password..." required>
                             </div>
-                            <button type="submit" name="login" class="btn btn-primary w-100 mt-3 fw-semibold">Masuk Sekarang</button>
+                            <button type="submit" name="login" class="btn btn-primary w-100 mt-3 fw-semibold">Login</button>
                         </form>
-                        <p class="text-center mt-4 text-muted" style="font-size: 0.85rem;">
-                            &copy; <?= date("Y") ?> Inventory System. All rights reserved.
+                        <p class="text-center mt-3">
+                            Belum punya akun? <a href="register.php">Register</a>
                         </p>
                     </div>
                 </div>
@@ -77,7 +74,7 @@ if (isset($_POST['login'])) {
                 icon: 'success',
                 confirmButtonText: 'Masuk'
             }).then(() => {
-                window.location.href = 'pages/<?= $_SESSION['role'] ?>.php';
+                window.location.href = '<?= $_SESSION['role'] ?>/<?= $_SESSION['role'] ?>.php';
             });
         <?php elseif ($status === 'wrong_password'): ?>
             Swal.fire({
@@ -97,7 +94,5 @@ if (isset($_POST['login'])) {
     });
 </script>
 <?php endif; ?>
-
 </body>
-
 </html>

@@ -26,12 +26,12 @@ include 'config/db.php';
         <ul class="navbar-nav">
             <?php if ($_SESSION['role'] == 'admin'): ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="pages/admin.php">Admin Panel</a>
+                    <a class="nav-link" href="admin/admin.php">Admin</a>
                 </li>
             <?php endif; ?>
             <?php if ($_SESSION['role'] == 'petugas'): ?>
                 <li class="nav-item">
-                    <a class="nav-link" href="pages/petugas.php">Petugas Panel</a>
+                    <a class="nav-link" href="petugas/petugas.php">Petugas</a>
                 </li>
             <?php endif; ?>
             <li class="nav-item">
@@ -40,10 +40,5 @@ include 'config/db.php';
         </ul>
     </div>
 </nav>
-
-<div class="container">
-    <h1 class="mt-5">Dashboard</h1>
-    <p>Welcome, <?php echo $_SESSION['role']; ?>!</p>
-</div>
 </body>
 </html>
