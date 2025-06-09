@@ -2,7 +2,7 @@
 $host = 'localhost';
 $db = 'inventory';
 $user = 'root';
-$pass = 'pamekasan2005';
+$pass = '';
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 
