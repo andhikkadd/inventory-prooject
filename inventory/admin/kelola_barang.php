@@ -7,11 +7,12 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'admin') {
 
 require_once '../config/db.php';
 include '../pages/navbar.php';
+include '../config/function.php';
 
 if (isset($_GET['hapus'])) {
     $id = intval($_GET['hapus']);
     $stmt = $conn->prepare("DELETE FROM items WHERE id = ?");
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("s", $id);
     if ($stmt->execute()) {
         $user_id = $_SESSION['id_user'];
         $action = "Menghapus barang dengan ID: $id";
@@ -37,13 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['id_user'];
 
     if (isset($_POST['id']) && $_POST['id'] != '') {
-        $id = intval($_POST['id']);
+        $id = ($_POST['id']);
         $stmt = $conn->prepare("UPDATE items SET nama_barang=?, distributor=?, jumlah=?, harga=? WHERE id=?");
-        $stmt->bind_param("ssidi", $nama, $distributor, $jumlah, $harga, $id);
+        $stmt->bind_param("ssids", $nama, $distributor, $jumlah, $harga, $id);
         if ($stmt->execute()) {
             $action = "Mengubah data barang ID: $id";
             $log = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-            $log->bind_param("is", $user_id, $action);
+            $log->bind_param("ss", $user_id, $action);
             $log->execute();
 
             $_SESSION['message'] = "Data barang berhasil diperbarui.";
@@ -57,41 +58,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
     } else {
-      $cek = $conn->prepare("SELECT id FROM items WHERE nama_barang = ?");
-      $cek->bind_param("s", $nama);
-      $cek->execute();
-      $cek->store_result();
+        $cek = $conn->prepare("SELECT id FROM items WHERE nama_barang = ?");
+        $cek->bind_param("s", $nama);
+        $cek->execute();
+        $cek->store_result();
 
-      if ($cek->num_rows > 0) {
-          $_SESSION['message'] = "Gagal menambahkan barang.";
-          $_SESSION['message_type'] = "danger";
-          header("Location: kelola_barang.php");
-          exit;
-      }
-
-      $stmt = $conn->prepare("INSERT INTO items (nama_barang, distributor, jumlah, harga) VALUES (?, ?, ?, ?)");
-      $stmt->bind_param("ssis", $nama, $distributor, $jumlah, $harga);
-      if ($stmt->execute()) {
-          $insert_id = $stmt->insert_id;
-          $action = "Menambah barang baru ID: $insert_id";
-          $log = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-          $log->bind_param("is", $user_id, $action);
-          $log->execute();
-
-          $_SESSION['message'] = "Barang berhasil ditambahkan.";
-          $_SESSION['message_type'] = "success";
-          header("Location: kelola_barang.php");
-          exit;
-      } else {
-          $_SESSION['message'] = "Gagal menambahkan barang.";
-          $_SESSION['message_type'] = "danger";
-          header("Location: kelola_barang.php");
-          exit;
+        if ($cek->num_rows > 0) {
+            $_SESSION['message'] = "Gagal menambahkan barang.";
+            $_SESSION['message_type'] = "danger";
+            header("Location: kelola_barang.php");
+            exit;
         }
+
+        $id_barang = generateUniqueID($conn, 'items', 'id', 'I');
+        $stmt = $conn->prepare("INSERT INTO items (id, nama_barang, distributor, jumlah, harga) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssid", $id_barang, $nama, $distributor, $jumlah, $harga);
+        if ($stmt->execute()) {
+            $insert_id = $stmt->insert_id;
+            $action = "Menambah barang baru ID: $insert_id";
+            $log = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
+            $log->bind_param("ss", $user_id, $action);
+            $log->execute();
+
+            $_SESSION['message'] = "Barang berhasil ditambahkan.";
+            $_SESSION['message_type'] = "success";
+            header("Location: kelola_barang.php");
+            exit;
+        } else {
+            $_SESSION['message'] = "Gagal menambahkan barang.";
+            $_SESSION['message_type'] = "danger";
+            header("Location: kelola_barang.php");
+            exit;
+            }
       }
 }
 
-$result = $conn->query("SELECT * FROM items ORDER BY id DESC");
+$result = $conn->query("SELECT * FROM items ORDER BY nama_barang ASC");
 ?>
 
 <!DOCTYPE html>
@@ -99,7 +101,7 @@ $result = $conn->query("SELECT * FROM items ORDER BY id DESC");
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Kelola Barang - Admin</title>
+    <title>Inventory App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>

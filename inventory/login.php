@@ -14,11 +14,11 @@ if (isset($_POST['login'])) {
     if ($result && mysqli_num_rows($result) === 1) {
         $user = mysqli_fetch_assoc($result);
 
-        if (hash('sha256', $password) === $user['password']) {
+        $hash = $user['password'];
+        if (password_verify($password, $hash)) {
             $_SESSION['id_user'] = $user['id'];
             $_SESSION['role'] = $user['role'];
             $_SESSION['username'] = $user['username'];
-
             $status = 'success';
         } else {
             $status = 'wrong_password';
@@ -33,9 +33,35 @@ if (isset($_POST['login'])) {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Inventory System</title>
+    <title>Inventory App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .custom-input {
+            border-radius: 0.5rem;
+        }
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 1.5rem;
+            }
+            .container {
+                max-width: 65%;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light d-flex align-items-center" style="height: 100vh;">
     <div class="container">

@@ -14,7 +14,7 @@ include '../pages/navbar.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Inventory App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -80,6 +80,9 @@ include '../pages/navbar.php';
         }
         @media (max-width: 767px) {
             .dashboard-header { margin-top: 1.5rem; margin-bottom: 1.5rem;}
+            .col-md-4 {
+                max-width: 75%;
+            }
         }
     </style>
 </head>
@@ -121,7 +124,7 @@ include '../pages/navbar.php';
                         <i class="bi bi-bar-chart-line-fill"></i>
                     </div>
                     <h5 class="card-title mb-2">Laporan</h5>
-                    <p class="card-text">Lihat dan cetak laporan stok & transaksi.</p>
+                    <p class="card-text">Lihat dan cetak laporan stok.</p>
                     <span class="btn btn-dashboard laporan" style="color:#f59e42;">Lihat</span>
                 </div>
             </a>

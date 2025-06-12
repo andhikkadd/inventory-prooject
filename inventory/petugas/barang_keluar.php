@@ -7,42 +7,49 @@ if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'petugas') {
 
 require_once '../config/db.php';
 include '../pages/navbar.php';
+include '../config/function.php';
 
 $items = mysqli_query($conn, "SELECT id, nama_barang, jumlah FROM items");
 
 if (isset($_POST['tambah'])) {
     $id_barang = $_POST['id_barang'];
-    $jumlah = $_POST['jumlah'];
-    $tanggal = $_POST['tanggal']; 
+    $jumlah = intval($_POST['jumlah']);
+    date_default_timezone_set('Asia/Jakarta');
+    $tanggal = date('Y-m-d H:i:s');
     $user_id = $_SESSION['id_user'];
-
-    $stok_query = $conn->query("SELECT jumlah FROM items WHERE id = $id_barang");
-    $stok = $stok_query->fetch_assoc()['jumlah'];
-
+    
     if ($id_barang && $jumlah > 0 && $tanggal) {
-        if ($jumlah > $stok) {
-            $_SESSION['message'] = "Jumlah yang diminta melebihi stok yang tersedia!";
-            $_SESSION['message_type'] = "danger";
-        } else {
-            $stmt = $conn->prepare("INSERT INTO barang_keluar (id_barang, jumlah, tanggal, user_id) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iisi", $id_barang, $jumlah, $tanggal, $user_id);
+        $result = $conn->query("SELECT jumlah FROM items WHERE id = '$id_barang'");
+        $row = $result->fetch_assoc();
+        $stok_sekarang = $row['jumlah'];
+
+        if ($stok_sekarang >= $jumlah) {
+            $id = generateUniqueId($conn, 'barang_keluar', 'id', 'BK');
+            $stmt = $conn->prepare("INSERT INTO barang_keluar (id, id_barang, jumlah, tanggal, user_id) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssiss", $id, $id_barang, $jumlah, $tanggal, $user_id);
+        
             if ($stmt->execute()) {
-                $conn->query("UPDATE items SET jumlah = jumlah - $jumlah WHERE id = $id_barang");
-                $action = "Menambah barang keluar (ID Barang: $id_barang, Jumlah: $jumlah, Tanggal: $tanggal)";
-                $stmt2 = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-                $stmt2->bind_param("is", $user_id, $action);
+                $conn->query("UPDATE items SET jumlah = jumlah - $jumlah WHERE id = '$id_barang'");
+                $action = "Mengeluarkan barang keluar (ID Barang: $id_barang, Jumlah: $jumlah, Tanggal: $tanggal)";
+                $stmt2 = $conn->prepare("INSERT INTO log_aktivitas (user_id, id_barang, action) VALUES (?, ?, ?)");
+                $stmt2->bind_param("sss", $user_id, $id_barang, $action);
                 $stmt2->execute();
-                $_SESSION['message'] = "Barang keluar berhasil ditambahkan!";
+        
+                $_SESSION['message'] = "Barang keluar berhasil diproses!";
                 $_SESSION['message_type'] = "success";
             } else {
-                $_SESSION['message'] = "Gagal menambah barang keluar!";
+                $_SESSION['message'] = "Gagal memproses barang keluar!";
                 $_SESSION['message_type'] = "danger";
             }
+        } else {
+            $_SESSION['message'] = "Stok tidak mencukupi!";
+            $_SESSION['message_type'] = "danger";
         }
     } else {
         $_SESSION['message'] = "Data tidak valid!";
         $_SESSION['message_type'] = "danger";
     }
+
     header("Location: barang_keluar.php");
     exit;
 }
@@ -54,12 +61,12 @@ if (isset($_POST['edit'])) {
     $tanggal = $_POST['tanggal'];
     $user_id = $_SESSION['id_user'];
 
-    $q = $conn->query("SELECT * FROM barang_keluar WHERE id=$id");
+    $q = $conn->query("SELECT * FROM barang_keluar WHERE id='$id'");
     $lama = $q->fetch_assoc();
     $jumlah_lama = $lama['jumlah'];
     $id_barang_lama = $lama['id_barang'];
 
-    $stok_query = $conn->query("SELECT jumlah FROM items WHERE id = $id_barang");
+    $stok_query = $conn->query("SELECT jumlah FROM items WHERE id = '$id_barang'");
     $stok = $stok_query->fetch_assoc()['jumlah'];
 
     if ($id && $id_barang && $jumlah_baru > 0 && $tanggal) {
@@ -68,13 +75,13 @@ if (isset($_POST['edit'])) {
             $_SESSION['message_type'] = "danger";
         } else {
             $stmt = $conn->prepare("UPDATE barang_keluar SET id_barang=?, jumlah=?, tanggal=? WHERE id=?");
-            $stmt->bind_param("iisi", $id_barang, $jumlah_baru, $tanggal, $id);
+            $stmt->bind_param("siss", $id_barang, $jumlah_baru, $tanggal, $id);
             if ($stmt->execute()) {
-                $conn->query("UPDATE items SET jumlah = jumlah + $jumlah_lama WHERE id = $id_barang_lama");
-                $conn->query("UPDATE items SET jumlah = jumlah - $jumlah_baru WHERE id = $id_barang");
+                $conn->query("UPDATE items SET jumlah = jumlah + $jumlah_lama WHERE id = '$id_barang_lama'");
+                $conn->query("UPDATE items SET jumlah = jumlah - $jumlah_baru WHERE id = '$id_barang'");
                 $action = "Mengedit barang keluar (ID: $id, ID Barang: $id_barang, Jumlah: $jumlah_baru, Tanggal: $tanggal)";
-                $stmt2 = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-                $stmt2->bind_param("is", $user_id, $action);
+                $stmt2 = $conn->prepare("INSERT INTO log_aktivitas (user_id, id_barang, action) VALUES (?, ?, ?)");
+                $stmt2->bind_param("sss", $user_id, $id_barang, $action);
                 $stmt2->execute();
                 $_SESSION['message'] = "Barang keluar berhasil diubah!";
                 $_SESSION['message_type'] = "success";
@@ -92,18 +99,18 @@ if (isset($_POST['edit'])) {
 }
 
 if (isset($_GET['hapus'])) {
-    $id = intval($_GET['hapus']);
+    $id = ($_GET['hapus']);
     $user_id = $_SESSION['id_user'];
-    $q = $conn->query("SELECT * FROM barang_keluar WHERE id=$id");
+    $q = $conn->query("SELECT * FROM barang_keluar WHERE id='$id'");
     if ($q->num_rows > 0) {
         $lama = $q->fetch_assoc();
         $id_barang = $lama['id_barang'];
         $jumlah = $lama['jumlah'];
-        $conn->query("DELETE FROM barang_keluar WHERE id=$id");
-        $conn->query("UPDATE items SET jumlah = jumlah + $jumlah WHERE id = $id_barang");
+        $conn->query("DELETE FROM barang_keluar WHERE id='$id'");
+        $conn->query("UPDATE items SET jumlah = jumlah + $jumlah WHERE id = '$id_barang'");
         $action = "Menghapus barang keluar (ID: $id, ID Barang: $id_barang, Jumlah: $jumlah)";
         $stmt2 = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-        $stmt2->bind_param("is", $user_id, $action);
+        $stmt2->bind_param("ss", $user_id, $action);
         $stmt2->execute();
         $_SESSION['message'] = "Barang keluar berhasil dihapus!";
         $_SESSION['message_type'] = "success";
@@ -119,7 +126,7 @@ $sql = "SELECT bk.id, i.nama_barang, bk.jumlah, bk.tanggal, u.username, bk.id_ba
         FROM barang_keluar bk
         JOIN items i ON bk.id_barang = i.id
         JOIN users u ON bk.user_id = u.id
-        ORDER BY bk.tanggal DESC";
+        ORDER BY bk.tanggal ASC";
 $result = mysqli_query($conn, $sql);
 ?>
 
@@ -127,7 +134,7 @@ $result = mysqli_query($conn, $sql);
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Barang Keluar</title>
+    <title>Inventory App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>

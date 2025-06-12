@@ -11,7 +11,12 @@ while($b = $resBarang->fetch_assoc()) {
     $barangArr[$b['id']] = $b['nama_barang'];
 }
 
-$log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON l.user_id = u.id ORDER BY l.id DESC LIMIT 100");
+$log = $conn->query("SELECT l.*, u.username, u.role 
+    FROM log_aktivitas l 
+    JOIN users u ON l.user_id = u.id 
+    WHERE u.role != 'admin'
+    ORDER BY l.tanggal ASC LIMIT 100");
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -112,9 +117,9 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                         <tr>
                             <th>ID</th>
                             <th>Nama Barang</th>
-                            <th>Deskripsi</th>
+                            <th>Distributor</th>
                             <th>Jumlah (Kardus)</th>
-                            <th>Harga (Rp)</th>
+                            <th>Harga</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -125,7 +130,7 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                                     <td><?= htmlspecialchars($b['nama_barang']) ?></td>
                                     <td><?= htmlspecialchars($b['distributor']) ?></td>
                                     <td><?= $b['jumlah'] ?></td>
-                                    <td><?= number_format($b['harga'], 2, ',', '.') ?></td>
+                                    <td>Rp. <?= number_format($b['harga'], 2, ',', '.') ?></td>
                                 </tr>
                             <?php endwhile; ?>
                         <?php else: ?>
@@ -156,12 +161,11 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                             <?php while($l = $log->fetch_assoc()):
                                 $action = $l['action'];
                                 $jenis = '';
-                                $namaBarang = '-';
-                                $jumlah = '-';
-
+                                $namaBarang = '';
+                                $jumlah = '';
                                 if (stripos($action, 'barang masuk') !== false) {
                                     $jenis = 'Barang Masuk';
-                                    if (preg_match('/ID Barang: (\d+)/i', $action, $match) && isset($match[1])) {
+                                    if (preg_match('/ID Barang: ([\w\-]+)/i', $action, $match) && isset($match[1])) {
                                         $idBarang = $match[1];
                                         $namaBarang = isset($barangArr[$idBarang]) ? $barangArr[$idBarang] : '-';
                                     }
@@ -170,7 +174,7 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                                     }
                                 } elseif (stripos($action, 'barang keluar') !== false) {
                                     $jenis = 'Barang Keluar';
-                                    if (preg_match('/ID Barang: (\d+)/i', $action, $match) && isset($match[1])) {
+                                    if (preg_match('/ID Barang: ([\w\-]+)/i', $action, $match) && isset($match[1])) {
                                         $idBarang = $match[1];
                                         $namaBarang = isset($barangArr[$idBarang]) ? $barangArr[$idBarang] : '-';
                                     }
@@ -179,7 +183,7 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                                     }
                                 } elseif (stripos($action, 'mengubah') !== false || stripos($action, 'mengedit') !== false) {
                                     $jenis = 'Update Barang';
-                                    if (preg_match('/ID Barang: (\d+)/i', $action, $match) && isset($match[1])) {
+                                    if (preg_match('/ID Barang: ([\w\-]+)/i', $action, $match) && isset($match[1])) {
                                         $idBarang = $match[1];
                                         $namaBarang = isset($barangArr[$idBarang]) ? $barangArr[$idBarang] : '-';
                                     }
@@ -190,7 +194,7 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                                     }
                                 } elseif (stripos($action, 'menghapus') !== false) {
                                     $jenis = 'Hapus Barang';
-                                    if (preg_match('/ID Barang: (\d+)/i', $action, $match) && isset($match[1])) {
+                                    if (preg_match('/ID Barang: ([\w\-]+)/i', $action, $match) && isset($match[1])) {
                                         $idBarang = $match[1];
                                         $namaBarang = isset($barangArr[$idBarang]) ? $barangArr[$idBarang] : '-';
                                     }
@@ -200,7 +204,7 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
                                 }
                             ?>
                             <tr>
-                                <td><?= !empty($l['created_at']) ? date('d-m-Y H:i:s', strtotime($l['created_at'])) : '-' ?></td>
+                                <td><?= !empty($l['tanggal']) ? date('d-m-Y', strtotime($l['tanggal'])) : '-' ?></td>
                                 <td><?= htmlspecialchars($l['username']) ?></td>
                                 <td><?= htmlspecialchars($jenis) ?></td>
                                 <td><?= htmlspecialchars($namaBarang) ?></td>
@@ -222,7 +226,6 @@ $log = $conn->query("SELECT l.*, u.username FROM log_aktivitas l JOIN users u ON
 function printDiv(divId) {
     var printContents = document.getElementById(divId).innerHTML;
     var originalContents = document.body.innerHTML;
-
     document.body.innerHTML = printContents;
     window.print();
     document.body.innerHTML = originalContents;

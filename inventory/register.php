@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'config/db.php';
+include 'config/function.php';
 
 $status = '';
 
@@ -10,25 +11,27 @@ if (isset($_POST['register'])) {
     $role = $_POST['role'];
 
     $cek = mysqli_query($conn, "SELECT * FROM users WHERE username = '$username'");
+
     if (mysqli_num_rows($cek) > 0) {
         $status = 'username_exists';
     } else {
-        $hashed = hash('sha256', $password);
-        $insert = mysqli_query($conn, "INSERT INTO users (username, password, role) VALUES ('$username', '$hashed', '$role')");
+        $id_user = generateUniqueId($conn, 'users', 'id' ,'00');
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
+        $insert = mysqli_query($conn, "INSERT INTO users (id, username, password, role) VALUES ('$id_user', '$username', '$hashed', '$role')");
         if ($insert) {
             $status = 'success';
         } else {
             $status = 'failed';
         }
     }
-}   
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Inventory System</title>
+    <title>Inventory App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -56,7 +59,7 @@ if (isset($_POST['register'])) {
         .role-desc {
             font-size: 0.78rem;
         }
-        @media (max-width: 575.98px) {
+        @media (max-width: 576px) {
             .role-card {
                 padding: 0.5rem 0.1rem !important;
             }
@@ -68,6 +71,9 @@ if (isset($_POST['register'])) {
             }
             .role-desc {
                 font-size: 0.72rem;
+            }
+            .container {
+                max-width: 70%;
             }
         }
     </style>
