@@ -10,14 +10,14 @@ include '../pages/navbar.php';
 include '../config/function.php';
 
 if (isset($_GET['hapus'])) {
-    $id = intval($_GET['hapus']);
+    $id = ($_GET['hapus']);
     $stmt = $conn->prepare("DELETE FROM items WHERE id = ?");
     $stmt->bind_param("s", $id);
     if ($stmt->execute()) {
         $user_id = $_SESSION['id_user'];
         $action = "Menghapus barang dengan ID: $id";
         $log = $conn->prepare("INSERT INTO log_aktivitas (user_id, action) VALUES (?, ?)");
-        $log->bind_param("is", $user_id, $action);
+        $log->bind_param("ss", $user_id, $action);
         $log->execute();
 
         $_SESSION['message'] = "Data barang berhasil dihapus.";
